@@ -5,14 +5,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/sensu/sensu-go/lua"
 	"github.com/sensu/sensu-go/types"
-	"github.com/sensu/sensu-go/util/eval"
 	utillogging "github.com/sensu/sensu-go/util/logging"
 )
 
 func evaluateEventFilterStatement(event *types.Event, statement string) bool {
-	parameters := map[string]interface{}{"event": event}
-	result, err := eval.EvaluatePredicate(statement, parameters)
+	result, err := lua.EvalPredicate(lua.Env{"event": event}, statement)
 	if err != nil {
 		fields := utillogging.EventFields(event, false)
 		logger.WithError(err).WithFields(fields).

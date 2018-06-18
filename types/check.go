@@ -10,7 +10,6 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/robfig/cron"
 	"github.com/sensu/sensu-go/types/dynamic"
-	"github.com/sensu/sensu-go/util/eval"
 	utilstrings "github.com/sensu/sensu-go/util/strings"
 )
 
@@ -285,7 +284,7 @@ func (p *ProxyRequests) Validate() error {
 		return errors.New("proxy request splay coverage must be greater than 0 if splay is enabled")
 	}
 
-	return eval.ValidateStatements(p.EntityAttributes, false)
+	return nil
 }
 
 // ValidateOutputMetricFormat returns an error if the string is not a valid metric

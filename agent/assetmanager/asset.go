@@ -13,8 +13,8 @@ import (
 
 	"github.com/mholt/archiver"
 	"github.com/nightlyone/lockfile"
+	"github.com/sensu/sensu-go/lua"
 	"github.com/sensu/sensu-go/types"
-	"github.com/sensu/sensu-go/util/eval"
 	"github.com/sensu/sensu-go/util/retry"
 	"github.com/sirupsen/logrus"
 	filetype "gopkg.in/h2non/filetype.v1"
@@ -49,7 +49,7 @@ func (d *RuntimeAsset) isRelevantTo(entity types.Entity) (bool, error) {
 	params["entity"] = entity
 
 	for _, filter := range d.asset.Filters {
-		result, err := eval.EvaluatePredicate(filter, params)
+		result, err := lua.EvalPredicate(lua.Env{"entity": entity}, filter)
 		if err != nil {
 			return false, err
 		}

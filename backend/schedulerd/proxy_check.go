@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/sensu/sensu-go/agent"
+	"github.com/sensu/sensu-go/lua"
 	"github.com/sensu/sensu-go/types"
 	"github.com/sensu/sensu-go/types/dynamic"
-	"github.com/sensu/sensu-go/util/eval"
 )
 
 // matchEntities matches the provided list of entities to the entity attributes
@@ -19,9 +19,7 @@ func matchEntities(entities []*types.Entity, proxyRequest *types.ProxyRequests) 
 OUTER:
 	for _, entity := range entities {
 		for _, expression := range proxyRequest.EntityAttributes {
-			parameters := map[string]interface{}{"entity": entity}
-
-			result, err := eval.EvaluatePredicate(expression, parameters)
+			result, err := lua.EvalPredicate(lua.Env{"entity": entity}, expression)
 			if err != nil {
 				// Skip to the next entity
 				logger.WithError(err).Errorf("expression '%s' is invalid", expression)

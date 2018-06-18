@@ -23,6 +23,8 @@ const (
 	// HandlerUDPType represents handlers that send event data to a remote UDP
 	// socket
 	HandlerUDPType = "udp"
+
+	HandlerLuaType = "lua"
 )
 
 // Validate returns an error if the handler does not pass validation tests.
@@ -52,7 +54,7 @@ func (h *Handler) validateType() error {
 	}
 
 	switch h.Type {
-	case "pipe", "set", "grpc":
+	case "pipe", "set", "grpc", "lua":
 		return nil
 	case "tcp", "udp":
 		return h.Socket.Validate()

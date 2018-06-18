@@ -10,6 +10,7 @@ import (
 
 	"github.com/sensu/sensu-go/backend/store"
 	"github.com/sensu/sensu-go/command"
+	"github.com/sensu/sensu-go/lua"
 	"github.com/sensu/sensu-go/rpc"
 	"github.com/sensu/sensu-go/types"
 	utillogging "github.com/sensu/sensu-go/util/logging"
@@ -90,6 +91,10 @@ func (p *Pipelined) handleEvent(event *types.Event) error {
 		case "grpc":
 			if _, err := p.grpcHandler(u.Extension, event, eventData); err != nil {
 				logger.WithFields(fields).Error(err)
+			}
+		case "lua":
+			if err := lua.Exec(lua.Env{"event": event}, handler.Command); err != nil {
+				logger.WithFields(fields).Errorf("error executing lua script: %s", err)
 			}
 		default:
 			return errors.New("unknown handler type")
