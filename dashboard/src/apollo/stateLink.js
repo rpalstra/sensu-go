@@ -8,6 +8,7 @@ const resolvers = merge.all([
   auth,
   addDeletedFieldTo("Event"),
   addDeletedFieldTo("Entity"),
+  addDeletedFieldTo("Check"),
 ]);
 
 const stateLink = ({ cache }) => withClientState({ ...resolvers, cache });

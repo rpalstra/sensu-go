@@ -8,6 +8,11 @@ extend type Entity {
   deleted: Boolean!
 }
 
+extend type Check {
+  "Describes whether the check has been deleted from the system"
+  deleted: Boolean!
+}
+
 extend type Query {
   "Describes state of authorization tokens"
   auth: Auth
