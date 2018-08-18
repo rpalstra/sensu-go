@@ -30,4 +30,7 @@ message EventFilter {
 
    // Namespace to which the filter belongs to
    string namespace = 7;
+
+  // The type of the filter (govaluate or js)
+  string type = 8;
 }
