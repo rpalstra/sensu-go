@@ -13,12 +13,12 @@ import (
 type registry map[meta.TypeMeta]meta.GroupVersionKind
 
 var typeRegistry = registry{
-	meta.TypeMeta{Kind: "Namespace", APIVersion: "core"}:          core.Namespace{},
-	meta.TypeMeta{Kind: "Role", APIVersion: "rbac"}:               rbac.Role{},
-	meta.TypeMeta{Kind: "ClusterRole", APIVersion: "rbac"}:        rbac.ClusterRole{},
-	meta.TypeMeta{Kind: "ClusterRoleBinding", APIVersion: "rbac"}: rbac.ClusterRoleBinding{},
-	meta.TypeMeta{Kind: "RoleBinding", APIVersion: "rbac"}:        rbac.RoleBinding{},
-	meta.TypeMeta{Kind: "Subject", APIVersion: "rbac"}:            rbac.Subject{},
+	meta.TypeMeta{Kind: "clusterrole", APIVersion: "rbac"}:        rbac.ClusterRole{},
+	meta.TypeMeta{Kind: "clusterrolebinding", APIVersion: "rbac"}: rbac.ClusterRoleBinding{},
+	meta.TypeMeta{Kind: "role", APIVersion: "rbac"}:               rbac.Role{},
+	meta.TypeMeta{Kind: "rolebinding", APIVersion: "rbac"}:        rbac.RoleBinding{},
+	meta.TypeMeta{Kind: "subject", APIVersion: "rbac"}:            rbac.Subject{},
+	meta.TypeMeta{Kind: "namespace", APIVersion: "core"}:          core.Namespace{},
 }
 
 // Resolve returns a zero-valued meta.GroupVersionKind, given a meta.TypeMeta.

@@ -29,7 +29,7 @@ import (
 type registry map[meta.TypeMeta]meta.GroupVersionKind
 
 var typeRegistry = registry{ {{ range $index, $t := . }}
-  meta.TypeMeta{Kind: "{{ $t.Kind }}", APIVersion: "{{ $t.APIVersion }}"}: {{ $t.APIVersion }}.{{ $t.Kind }}{}, {{ end }}
+  meta.TypeMeta{Kind: "{{ $t.Kind | ToLower }}", APIVersion: "{{ $t.APIVersion }}"}: {{ $t.APIVersion }}.{{ $t.Kind }}{}, {{ end }}
 }
 
 // Resolve returns a zero-valued meta.GroupVersionKind, given a meta.TypeMeta.
@@ -44,7 +44,10 @@ func Resolve(mt meta.TypeMeta) (meta.GroupVersionKind, error) {
 `
 
 var (
-	registryTmpl = template.Must(template.New("registry").Parse(templateText))
+	registryFuncMap = template.FuncMap{
+		"ToLower": strings.ToLower,
+	}
+	registryTmpl = template.Must(template.New("registry").Funcs(registryFuncMap).Parse(templateText))
 )
 
 type templateData []meta.TypeMeta
