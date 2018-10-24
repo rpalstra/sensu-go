@@ -32,18 +32,19 @@ func (r *Generic) Mount(parent *mux.Router) {
 	// Global resources
 	// For now we have to ignore the version variable because our apis are not
 	// frozen yet
-	//routes.Path("/{group}/{version}/{kind}", r.listGlobal).Methods(http.MethodGet)
-	routes.Path("/{group}/{kind}", r.listGlobal).Methods(http.MethodGet)
+	//routes.Path("/{group}/{version}/{resource}", r.listGlobal).Methods(http.MethodGet)
+	routes.Path("/{group}/{resource}", r.listGlobal).Methods(http.MethodGet)
 }
 
 func (r *Generic) listGlobal(req *http.Request) (interface{}, error) {
 	vars := mux.Vars(req)
-	kind := strings.ToLower(vars["kind"])
+	resource := strings.ToLower(vars["resource"])
 	apiVersion := path.Join(vars["group"], vars["version"])
 
-	// This will return an error since the "kind" we have here is in its plural
-	// form (e.g. checks) but all registered kinds are singular (e.g. check). See
-	// https://github.com/sensu/sensu-go/pull/2212#pullrequestreview-167971166
+	// HACK: remove the last letter of the resource to get the kind
+	// TODO: remove when https://github.com/sensu/sensu-go/pull/2214 is merged
+	kind := strings.TrimSuffix(resource, "s")
+
 	gvk, err := registry.Resolve(meta.TypeMeta{
 		Kind:       kind,
 		APIVersion: apiVersion,
@@ -55,9 +56,11 @@ func (r *Generic) listGlobal(req *http.Request) (interface{}, error) {
 	// t is the concrete type of the meta.GroupVersionKind returned by
 	// registry.Resolve()
 	t := reflect.TypeOf(gvk)
+	slice := reflect.SliceOf(t)
+	ptr := reflect.New(slice)
+	ptr.Elem().Set(reflect.MakeSlice(slice, 0, 0))
+	s := ptr.Interface()
+	err = r.store.List(req.Context(), kind, s)
 
-	slice := reflect.New(reflect.SliceOf(t))
-	err = r.store.List(req.Context(), kind, slice)
-
-	return slice, err
+	return s, err
 }

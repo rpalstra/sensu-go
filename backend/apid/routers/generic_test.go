@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/mock"
 
+	"github.com/sensu/sensu-go/internal/apis/rbac"
 	"github.com/sensu/sensu-go/testing/mockstore/v2"
 )
 
@@ -17,18 +18,25 @@ import (
 func TestGenericListGlobal(t *testing.T) {
 	store := &mockstore.MockStore{}
 
-	// I'm not sure why "context.Context" doesn't work for the type of the first
-	// argument to List(). A type that works is "*context.valueCtx", infered
-	// from the error I got, but that doesn't make sense to me and I must be
-	// missing something here...
-	// store.On("List", mock.AnythingOfType("context.Context"), mock.AnythingOfType("string"), mock.Anything).Return(nil)
-	store.On("List", mock.AnythingOfType("*context.valueCtx"), mock.AnythingOfType("string"), mock.Anything).Return(nil)
+	store.On("List",
+		mock.AnythingOfType("*context.valueCtx"),
+		mock.AnythingOfType("string"),
+		mock.Anything).
+		Return(nil).
+		Run(func(args mock.Arguments) {
+			clusterRoles := args.Get(2).(*[]rbac.ClusterRole)
+			*clusterRoles = append(*clusterRoles, rbac.ClusterRole{
+				Rules: []rbac.Rule{
+					rbac.Rule{Verbs: []string{"*"}},
+				},
+			})
+		})
 
 	parentRouter := mux.NewRouter()
 	genericRouter := NewGenericRouter(store)
 	genericRouter.Mount(parentRouter)
 
-	req, err := http.NewRequest("GET", "/apis/rbac/clusterrole", nil)
+	req, err := http.NewRequest("GET", "/apis/rbac/clusterroles", nil)
 	if err != nil {
 		t.Fatalf("http.NewRequest() error = %v", err)
 	}
@@ -36,5 +44,5 @@ func TestGenericListGlobal(t *testing.T) {
 	w := httptest.NewRecorder()
 	parentRouter.ServeHTTP(w, req)
 
-	fmt.Println(w.Result())
+	fmt.Println(w.Body.String())
 }
