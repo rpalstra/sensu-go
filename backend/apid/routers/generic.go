@@ -1,8 +1,11 @@
 package routers
 
 import (
+	"fmt"
 	"net/http"
+	"path"
 	"reflect"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/sensu/sensu-go/internal/apis/meta"
@@ -23,22 +26,39 @@ func NewGenericRouter(store storev2.Store) *Generic {
 	}
 }
 
+// Mount ...
 func (r *Generic) Mount(parent *mux.Router) {
 	routes := ResourceRoute{Router: parent, PathPrefix: "/apis/"}
-	routes.Path("/{group}/{version}/{kind}", r.list).Methods(http.MethodGet)
+
+	// Global resources
+	// For now we have to ignore the version variable because our apis are not
+	// frozen yet
+	//routes.Path("/{group}/{version}/{kind}", r.listGlobal).Methods(http.MethodGet)
+	routes.Path("/{group}/{kind}", r.listGlobal).Methods(http.MethodGet)
 }
 
-func (r *Generic) list(req *http.Request) (interface{}, error) {
+func (r *Generic) listGlobal(req *http.Request) (interface{}, error) {
 	vars := mux.Vars(req)
-
 	kind := vars["kind"]
-	apiVer := vars["group"] + "/" + vars["version"]
+	apiVersion := path.Join(vars["group"], vars["version"])
 
-	// This probably won't work because Resolve() expects a "capitalized" kind.
-	// I'm also not 100% sure of the format apiVer should have.
-	v, err := registry.Resolve(meta.TypeMeta{Kind: kind, APIVersion: apiVer})
-	slice := reflect.New(reflect.SliceOf(v)).Interface()
+	// This will return an error since the "kind" we have here is in its plural
+	// form (e.g. checks) but all registered kinds are singular (e.g. check). See
+	// https://github.com/sensu/sensu-go/pull/2212#pullrequestreview-167971166
+	v, err := registry.Resolve(meta.TypeMeta{
+		Kind:       strings.ToLower(kind),
+		APIVersion: apiVersion,
+	})
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(reflect.TypeOf(v))
 
-	err = r.store.List(req.Context(), vars["kind"], slice)
-	return slice, err
+	//t := reflect.New(v)
+
+	//slice := reflect.New(reflect.SliceOf(v)).Interface()
+
+	//err = r.store.List(req.Context(), vars["kind"], slice)
+	// return slice, err
+	return nil, nil
 }
