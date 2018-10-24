@@ -1,7 +1,6 @@
 package routers
 
 import (
-	"fmt"
 	"net/http"
 	"path"
 	"reflect"
@@ -39,26 +38,26 @@ func (r *Generic) Mount(parent *mux.Router) {
 
 func (r *Generic) listGlobal(req *http.Request) (interface{}, error) {
 	vars := mux.Vars(req)
-	kind := vars["kind"]
+	kind := strings.ToLower(vars["kind"])
 	apiVersion := path.Join(vars["group"], vars["version"])
 
 	// This will return an error since the "kind" we have here is in its plural
 	// form (e.g. checks) but all registered kinds are singular (e.g. check). See
 	// https://github.com/sensu/sensu-go/pull/2212#pullrequestreview-167971166
-	v, err := registry.Resolve(meta.TypeMeta{
-		Kind:       strings.ToLower(kind),
+	gvk, err := registry.Resolve(meta.TypeMeta{
+		Kind:       kind,
 		APIVersion: apiVersion,
 	})
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(reflect.TypeOf(v))
 
-	//t := reflect.New(v)
+	// t is the concrete type of the meta.GroupVersionKind returned by
+	// registry.Resolve()
+	t := reflect.TypeOf(gvk)
 
-	//slice := reflect.New(reflect.SliceOf(v)).Interface()
+	slice := reflect.New(reflect.SliceOf(t))
+	err = r.store.List(req.Context(), kind, slice)
 
-	//err = r.store.List(req.Context(), vars["kind"], slice)
-	// return slice, err
-	return nil, nil
+	return slice, err
 }
