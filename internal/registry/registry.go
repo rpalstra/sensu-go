@@ -29,7 +29,8 @@ import (
 type registry map[meta.TypeMeta]meta.GroupVersionKind
 
 var typeRegistry = registry{ {{ range $index, $t := . }}
-  meta.TypeMeta{Kind: "{{ $t.Kind | ToLower }}", APIVersion: "{{ $t.APIVersion }}"}: {{ $t.APIVersion }}.{{ $t.Kind }}{}, {{ end }}
+	meta.TypeMeta{Kind: "{{ $t.Kind }}", APIVersion: "{{ $t.APIVersion }}"}: {{ $t.APIVersion }}.{{ $t.Kind }}{}, 
+	meta.TypeMeta{Kind: "{{ $t.Kind | ToLower }}", APIVersion: "{{ $t.APIVersion }}"}: {{ $t.APIVersion }}.{{ $t.Kind }}{},{{ end }}
 }
 
 // Resolve returns a zero-valued meta.GroupVersionKind, given a meta.TypeMeta.
