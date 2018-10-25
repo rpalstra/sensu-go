@@ -68,21 +68,18 @@ func (r *RBAC) get(req *http.Request) (interface{}, error) {
 	// registry.Resolve()
 	typeOfGvk := reflect.TypeOf(gvk)
 
-	// Create a pointer of an unitialized sliceOfGvk
-	ptr := reflect.New(typeOfGvk)
+	// Create a pointer of an unitialized typeOfGvk
+	ptr := reflect.New(typeOfGvk).Interface()
 
-	// Assign our empty slice pointer to slicePtr so we can pass it to the store
-	elemPtr := ptr.Interface()
-
-	// List all elements of the given kind
-	err = r.store.Get(req.Context(), key, elemPtr)
+	// Get the requested object from the store
+	err = r.store.Get(req.Context(), key, ptr)
 	if err != nil {
 		if err == storev2.ErrNotFound {
 			return nil, actions.NewErrorf(actions.NotFound, "no resource found")
 		}
 	}
 
-	return elemPtr, err
+	return ptr, err
 }
 
 func (r *RBAC) list(req *http.Request) (interface{}, error) {
