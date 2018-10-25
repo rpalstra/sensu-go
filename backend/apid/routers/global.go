@@ -14,20 +14,20 @@ import (
 	storev2 "github.com/sensu/sensu-go/storage"
 )
 
-// RBAC is a router that handles requests for the RBAC API group resources.
-type RBAC struct {
+// Global is a router that handles requests to globally defined resources.
+type Global struct {
 	store storev2.Store
 }
 
-// NewRBACRouter instantiates a router that handles requests to the RBAC group
-func NewRBACRouter(store storev2.Store) *RBAC {
-	return &RBAC{
+// NewGlobalRouter instantiates a new Global.
+func NewGlobalRouter(store storev2.Store) *Global {
+	return &Global{
 		store: store,
 	}
 }
 
-// Mount ...
-func (r *RBAC) Mount(parent *mux.Router) {
+// Mount mounts this router's routes onto the given parent router.
+func (r *Global) Mount(parent *mux.Router) {
 	routes := ResourceRoute{Router: parent, PathPrefix: "/apis/"}
 
 	// For now we have to ignore the version variable because our apis are not
@@ -37,7 +37,7 @@ func (r *RBAC) Mount(parent *mux.Router) {
 	routes.Path("/{group}/{resource}/{name}", r.get).Methods(http.MethodGet)
 }
 
-func (r *RBAC) get(req *http.Request) (interface{}, error) {
+func (r *Global) get(req *http.Request) (interface{}, error) {
 	vars := mux.Vars(req)
 	group, version, resource, err := getGvrFromRoute(vars)
 	if err != nil {
@@ -82,7 +82,7 @@ func (r *RBAC) get(req *http.Request) (interface{}, error) {
 	return ptr, err
 }
 
-func (r *RBAC) list(req *http.Request) (interface{}, error) {
+func (r *Global) list(req *http.Request) (interface{}, error) {
 	vars := mux.Vars(req)
 	group, version, resource, err := getGvrFromRoute(vars)
 	if err != nil {

@@ -210,7 +210,7 @@ func registerRestrictedResources(router *mux.Router, store store.Store, storev2 
 		routers.NewUsersRouter(store),
 		routers.NewExtensionsRouter(store),
 		routers.NewClusterRouter(actions.NewClusterController(cluster)),
-		routers.NewRBACRouter(storev2),
+		routers.NewGlobalRouter(storev2),
 	)
 }
 

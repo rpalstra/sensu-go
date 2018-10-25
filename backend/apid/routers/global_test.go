@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestRBACGet(t *testing.T) {
+func TestGlobalGet(t *testing.T) {
 	type storeFunc func(*mockstore.MockStore)
 	tests := []struct {
 		name      string
@@ -71,7 +71,7 @@ func TestRBACGet(t *testing.T) {
 				tt.storeFunc(store)
 			}
 			parentRouter := mux.NewRouter()
-			genericRouter := NewRBACRouter(store)
+			genericRouter := NewGlobalRouter(store)
 			genericRouter.Mount(parentRouter)
 
 			req, err := http.NewRequest("GET", tt.url, nil)
@@ -83,17 +83,17 @@ func TestRBACGet(t *testing.T) {
 			parentRouter.ServeHTTP(w, req)
 
 			if w.Code != tt.wantCode {
-				t.Errorf("RBAC.list() = %d %s, want %v %s",
+				t.Errorf("Global.get() = %d %s, want %v %s",
 					w.Code, http.StatusText(w.Code), tt.wantCode, http.StatusText(tt.wantCode))
 			}
 			if w.Body.Len() < tt.wantLen {
-				t.Errorf("RBAC.list() ContentLength = %d bytes, want %d bytes", w.Body.Len(), tt.wantLen)
+				t.Errorf("Global.get() ContentLength = %d bytes, want %d bytes", w.Body.Len(), tt.wantLen)
 			}
 		})
 	}
 }
 
-func TestRBACList(t *testing.T) {
+func TestGlobalList(t *testing.T) {
 	type storeFunc func(*mockstore.MockStore)
 	tests := []struct {
 		name      string
@@ -151,7 +151,7 @@ func TestRBACList(t *testing.T) {
 				tt.storeFunc(store)
 			}
 			parentRouter := mux.NewRouter()
-			genericRouter := NewRBACRouter(store)
+			genericRouter := NewGlobalRouter(store)
 			genericRouter.Mount(parentRouter)
 
 			req, err := http.NewRequest("GET", tt.url, nil)
@@ -163,11 +163,11 @@ func TestRBACList(t *testing.T) {
 			parentRouter.ServeHTTP(w, req)
 
 			if w.Code != tt.wantCode {
-				t.Errorf("RBAC.list() = %d %s, want %v %s",
+				t.Errorf("Global.list() = %d %s, want %v %s",
 					w.Code, http.StatusText(w.Code), tt.wantCode, http.StatusText(tt.wantCode))
 			}
 			if w.Body.Len() < tt.wantLen {
-				t.Errorf("RBAC.list() ContentLength = %d bytes, want %d bytes", w.Body.Len(), tt.wantLen)
+				t.Errorf("Global.list() ContentLength = %d bytes, want %d bytes", w.Body.Len(), tt.wantLen)
 			}
 		})
 	}
