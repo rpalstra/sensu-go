@@ -15,7 +15,7 @@ import (
 
 // "clusterrole" in this function should really be "clusterroles" (note the
 // plural), but we're waiting for plural support from the type registry.
-func TestGenericListGlobal(t *testing.T) {
+func TestRBACList(t *testing.T) {
 	store := &mockstore.MockStore{}
 
 	store.On("List",
@@ -33,7 +33,7 @@ func TestGenericListGlobal(t *testing.T) {
 		})
 
 	parentRouter := mux.NewRouter()
-	genericRouter := NewGenericRouter(store)
+	genericRouter := NewRBACRouter(store)
 	genericRouter.Mount(parentRouter)
 
 	req, err := http.NewRequest("GET", "/apis/rbac/clusterroles", nil)
