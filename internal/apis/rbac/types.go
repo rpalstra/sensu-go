@@ -45,8 +45,13 @@ type Role struct {
 	meta.TypeMeta   `json:",inline" protobuf:"bytes,3,opt,name=typeMeta"`
 	meta.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 
+	Spec RoleSpec `json:"spec" protobuf:"bytes,2,opt,name=spec"`
+}
+
+// RoleSpec is a specification of a role.
+type RoleSpec struct {
 	// Rules hold all of the Rules for this Role.
-	Rules []Rule `json:"rules" protobuf:"bytes,2,rep,name=rules"`
+	Rules []Rule `json:"rules" protobuf:"bytes,1,rep,name=rules"`
 }
 
 // ClusterRole is a role that applies to all Namespaces within
@@ -56,8 +61,7 @@ type ClusterRole struct {
 	meta.TypeMeta   `json:",inline" protobuf:"bytes,3,opt,name=typeMeta"`
 	meta.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 
-	// Rules hold all of the Rules for this Role.
-	Rules []Rule `json:"rules" protobuf:"bytes,2,rep,name=rules"`
+	Spec RoleSpec `json:"spec" protobuf:"bytes,2,opt,name=spec"`
 }
 
 // RoleRef is used to map groups to Roles or ClusterRoles.
@@ -69,6 +73,15 @@ type RoleRef struct {
 	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
 }
 
+// BindingSpec is a specification of a role binding
+type BindingSpec struct {
+	// Subjects holds references to the objects the role applies to
+	Subjects []Subject `json:"subjects" protobuf:"bytes,1,rep,name=subjects"`
+
+	// RoleRef is the reference to a ClusterRole in the global namespace
+	RoleRef RoleRef `json:"roleRef" protobuf:"bytes,2,name=roleRef"`
+}
+
 // ClusterRoleBinding grants the permissions defined in a ClusterRole referenced
 // to a user or a set of users
 // +freeze-api:resource-name clusterRoleBindings
@@ -76,11 +89,7 @@ type ClusterRoleBinding struct {
 	meta.TypeMeta   `json:",inline" protobuf:"bytes,4,opt,name=typeMeta"`
 	meta.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 
-	// Subjects holds references to the objects the role applies to
-	Subjects []Subject `json:"subjects" protobuf:"bytes,2,rep,name=subjects"`
-
-	// RoleRef is the reference to a ClusterRole in the global namespace
-	RoleRef RoleRef `json:"roleRef" protobuf:"bytes,3,name=roleRef"`
+	Spec BindingSpec `json:"spec" protobuf:"bytes,2,opt,name=spec"`
 }
 
 // RoleBinding grants the permissions defined in a Role referenced to a user or
@@ -90,21 +99,21 @@ type RoleBinding struct {
 	meta.TypeMeta   `json:",inline" protobuf:"bytes,4,opt,name=typeMeta"`
 	meta.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 
-	// Subjects holds references to the objects the role applies to
-	Subjects []Subject `json:"subjects" protobuf:"bytes,2,rep,name=subjects"`
-
-	// RoleRef is the reference to a Role in the current namespace
-	RoleRef RoleRef `json:"roleRef" protobuf:"bytes,3,name=roleRef"`
+	Spec BindingSpec `json:"spec" protobuf:"bytes,2,opt,name=spec"`
 }
 
 // Subject contains a reference to the user identity a role binding applies to
 // +freeze-api:resource-name subjects
 type Subject struct {
-	meta.TypeMeta `json:",inline" protobuf:"bytes,3,opt,name=typeMeta"`
-
 	// Kind is the type of object referenced
 	Kind string `json:"kind" protobuf:"bytes,1,name=kind"`
 
 	// Name of the referenced object
 	Name string `json:"name" protobuf:"bytes,2,name=name"`
+
+	// Namespace the object is from
+	Namespace string `json:"namespace" protobuf:"bytes,3,opt,name=namespace"`
+
+	// APIGroup the object belongs to
+	APIGroup string `json:"apiGroup" protobuf:"bytes,4,opt,name=apiGroup"`
 }
