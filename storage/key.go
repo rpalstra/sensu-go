@@ -20,12 +20,16 @@ const (
 	// storageKeyTmpl is a template for a prefix identifier for an object
 	// that has a namespace.
 	// /sensu.io/{{ .GetGroup }}/{{ .GetVersion }}/{{ .GetNamespace }}/{{ .GetKind }}/{{ .GetName }}
-	uniqueStorageKeyTmpl = "/sensu.io/%s/%s/%s/%s/%s"
+	// BUG: The registry does not have a version for internal versions for now
+	//uniqueStorageKeyTmpl = "/sensu.io/%s/%s/%s/%s/%s"
+	uniqueStorageKeyTmpl = "/sensu.io/%s/%s/%s/%s"
 
 	// uniqueStorageKeyTmpl is a template for a unique identifier for an object
 	// that has a namespace.
 	// /sensu.io/{{ .GetGroup }}/{{ .GetVersion }}/{{ .GetNamespace }}/{{ .GetKind }}
-	storageKeyTmpl = "/sensu.io/%s/%s/%s/%s"
+	// BUG: The registry does not have a version for internal versions for now
+	// storageKeyTmpl = "/sensu.io/%s/%s/%s/%s"
+	storageKeyTmpl = "/sensu.io/%s/%s/%s"
 )
 
 // Some special objects, that don't have namespaces, follow the path patterns here.
@@ -43,12 +47,16 @@ const (
 	// globalStorageKeyTmpl is a template for a prefix identifier for an object
 	// that does not have a namespace.
 	// /sensu.io/{{ .GetGroup }}/{{ .GetVersion }}/{{ .GetKind }}
-	globalStorageKeyTmpl = "/sensu.io/%s/%s/%s"
+	// BUG: The registry does not have a version for internal versions for now
+	//globalStorageKeyTmpl = "/sensu.io/%s/%s/%s"
+	globalStorageKeyTmpl = "/sensu.io/%s/%s"
 
 	// globalUniqueStorageKeyTmpl is a template for a unique identifier for an
 	// object that does not have a namespace.
 	// /sensu.io/{{ .GetGroup }}/{{ .GetVersion }}/{{ .GetKind }}/{{ .GetName }}
-	globalUniqueStorageKeyTmpl = "/sensu.io/%s/%s/%s/%s"
+	// BUG: The registry does not have a version for internal versions for now
+	//globalUniqueStorageKeyTmpl = "/sensu.io/%s/%s/%s/%s"
+	globalUniqueStorageKeyTmpl = "/sensu.io/%s/%s/%s"
 )
 
 // noNamespace is a way to detect if a type does not belong in a namespace.
@@ -151,7 +159,7 @@ func (r RESTKey) PostPath() string {
 	return r.multi()
 }
 
-// RESTKey is a data type which is a responsible for computing key/value
+// StorageKey is a data type which is a responsible for computing key/value
 // storage key paths for Keyables.
 type StorageKey struct {
 	Keyable
@@ -166,8 +174,11 @@ func isNamespaced(k Keyable) bool {
 // Path returns a unique key.
 // Example: /sensu.io/core/v1/default/check/cpu
 func (s StorageKey) Path() string {
-	args := []interface{}{s.GetGroup(), s.GetVersion()}
 	var tmpl string
+	// BUG: The registry does not have a version for internal versions so
+	// s.GetVersion() will panic
+	//args := []interface{}{s.GetGroup(), s.GetVersion()}
+	args := []interface{}{s.GetGroup()}
 
 	if isNamespaced(s.Keyable) {
 		args = append(args, s.GetNamespace())
@@ -184,7 +195,10 @@ func (s StorageKey) Path() string {
 // Example: /sensu.io/core/v1/default/check
 func (s StorageKey) PrefixPath() string {
 	var tmpl string
-	args := []interface{}{s.GetGroup(), s.GetVersion()}
+	// BUG: The registry does not have a version for internal versions so
+	// s.GetVersion() will panic
+	//args := []interface{}{s.GetGroup(), s.GetVersion()}
+	args := []interface{}{s.GetGroup()}
 
 	if isNamespaced(s.Keyable) {
 		tmpl = storageKeyTmpl

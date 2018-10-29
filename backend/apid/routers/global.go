@@ -53,9 +53,6 @@ func (r *Global) get(req *http.Request) (interface{}, error) {
 	// TODO: remove when https://github.com/sensu/sensu-go/pull/2214 is merged
 	kind := strings.TrimSuffix(resource, "s")
 
-	// TODO: use the key builder instead
-	key := path.Join(kind, name)
-
 	gvk, err := registry.Resolve(meta.TypeMeta{
 		Kind:       kind,
 		APIVersion: apiVersion,
@@ -68,11 +65,24 @@ func (r *Global) get(req *http.Request) (interface{}, error) {
 	// registry.Resolve()
 	typeOfGvk := reflect.TypeOf(gvk)
 
+	// Initialize a new struct of type typeOfGvk and fill all the required meta
+	// fields required to obtain the key
+	objectMeta := meta.ObjectMeta{Name: name}
+	typeMeta := meta.TypeMeta{
+		APIVersion: apiVersion,
+		Kind:       kind,
+	}
+	keyablePtr := reflect.New(typeOfGvk)
+	keyable := reflect.Indirect(keyablePtr)
+	keyable.FieldByName("ObjectMeta").Set(reflect.ValueOf(objectMeta))
+	keyable.FieldByName("TypeMeta").Set(reflect.ValueOf(typeMeta))
+	storeKey := storev2.StorageKey{Keyable: keyablePtr.Interface().(storev2.Keyable)}
+
 	// Create a pointer of an unitialized typeOfGvk
 	ptr := reflect.New(typeOfGvk).Interface()
 
 	// Get the requested object from the store
-	err = r.store.Get(req.Context(), key, ptr)
+	err = r.store.Get(req.Context(), storeKey.Path(), ptr)
 	if err != nil {
 		if err == storev2.ErrNotFound {
 			return nil, actions.NewErrorf(actions.NotFound, "no resource found")
@@ -106,6 +116,17 @@ func (r *Global) list(req *http.Request) (interface{}, error) {
 	// registry.Resolve()
 	typeOfGvk := reflect.TypeOf(gvk)
 
+	// Initialize a new struct of type typeOfGvk and fill all the required meta
+	// fields required to obtain the key
+	typeMeta := meta.TypeMeta{
+		APIVersion: apiVersion,
+		Kind:       kind,
+	}
+	keyablePtr := reflect.New(typeOfGvk)
+	keyable := reflect.Indirect(keyablePtr)
+	keyable.FieldByName("TypeMeta").Set(reflect.ValueOf(typeMeta))
+	storeKey := storev2.StorageKey{Keyable: keyablePtr.Interface().(storev2.Keyable)}
+
 	// Get the slice type with element of type typeOfGvk
 	sliceOfGvk := reflect.SliceOf(typeOfGvk)
 
@@ -119,7 +140,7 @@ func (r *Global) list(req *http.Request) (interface{}, error) {
 	slicePtr := ptr.Interface()
 
 	// List all elements of the given kind
-	err = r.store.List(req.Context(), kind, slicePtr)
+	err = r.store.List(req.Context(), storeKey.PrefixPath(), slicePtr)
 	if err != nil {
 		return nil, err
 	}

@@ -49,6 +49,9 @@ type Role struct {
 	Rules []Rule `json:"rules" protobuf:"bytes,2,rep,name=rules"`
 }
 
+// NoNamespace since Roles are not namespaced
+func (Role) NoNamespace() {}
+
 // ClusterRole is a role that applies to all Namespaces within
 // a cluster.
 // +freeze-api:resource-name clusterRoles
@@ -59,6 +62,9 @@ type ClusterRole struct {
 	// Rules hold all of the Rules for this Role.
 	Rules []Rule `json:"rules" protobuf:"bytes,2,rep,name=rules"`
 }
+
+// NoNamespace since ClusterRoles are not namespaced
+func (ClusterRole) NoNamespace() {}
 
 // RoleRef is used to map groups to Roles or ClusterRoles.
 type RoleRef struct {
@@ -83,6 +89,9 @@ type ClusterRoleBinding struct {
 	RoleRef RoleRef `json:"roleRef" protobuf:"bytes,3,name=roleRef"`
 }
 
+// NoNamespace since ClusterRoleBindings are not namespaced
+func (ClusterRoleBinding) NoNamespace() {}
+
 // RoleBinding grants the permissions defined in a Role referenced to a user or
 // a set of users
 // +freeze-api:resource-name roleBindings
@@ -96,6 +105,9 @@ type RoleBinding struct {
 	// RoleRef is the reference to a Role in the current namespace
 	RoleRef RoleRef `json:"roleRef" protobuf:"bytes,3,name=roleRef"`
 }
+
+// NoNamespace since RoleBindings are not namespaced
+func (RoleBinding) NoNamespace() {}
 
 // Subject contains a reference to the user identity a role binding applies to
 // +freeze-api:resource-name subjects

@@ -116,22 +116,26 @@ func TestRESTKey(t *testing.T) {
 		{
 			Name:        "StorageKey Path",
 			KeyerMethod: StorageKey{fixture}.Path,
-			Expected:    "/sensu.io/muppets/v1/default/frogs/kermit",
+			// Expected:    "/sensu.io/muppets/v1/default/frogs/kermit",
+			Expected: "/sensu.io/muppets/default/frogs/kermit",
 		},
 		{
 			Name:        "StorageKey PrefixPath",
 			KeyerMethod: StorageKey{fixture}.PrefixPath,
-			Expected:    "/sensu.io/muppets/v1/default/frogs",
+			// Expected:    "/sensu.io/muppets/v1/default/frogs",
+			Expected: "/sensu.io/muppets/default/frogs",
 		},
 		{
 			Name:        "StorageKey Path (no namespace)",
 			KeyerMethod: StorageKey{noNamespaceFixture}.Path,
-			Expected:    "/sensu.io/muppets/v1/frogs/kermit",
+			// Expected:    "/sensu.io/muppets/v1/frogs/kermit",
+			Expected: "/sensu.io/muppets/frogs/kermit",
 		},
 		{
 			Name:        "StorageKey PrefixPath (no namespace)",
 			KeyerMethod: StorageKey{noNamespaceFixture}.PrefixPath,
-			Expected:    "/sensu.io/muppets/v1/frogs",
+			// Expected:    "/sensu.io/muppets/v1/frogs",
+			Expected: "/sensu.io/muppets/frogs",
 		},
 	}
 
