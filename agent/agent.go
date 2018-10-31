@@ -382,8 +382,13 @@ func (a *Agent) sendKeepalive() error {
 	}
 	keepalive := &types.Event{}
 
+	entity := a.getAgentEntity()
+
 	keepalive.Check = &types.Check{
-		Name:     "keepalive",
+		ObjectMeta: types.ObjectMeta{
+			Name:      "keepalive",
+			Namespace: entity.Namespace,
+		},
 		Interval: a.config.KeepaliveInterval,
 		Timeout:  a.config.KeepaliveTimeout,
 	}
